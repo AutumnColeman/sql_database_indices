@@ -58,17 +58,22 @@ Nested Loop  (cost=4.79..3789713.68 rows=282011562 width=244)
                     Index Cond: ((name)::text = 'Nienow, Kiehn and DuBuque'::text)
 
 --3 Write a query to find the average star rating for 'Nienow, Kiehn and DuBuque'. Run and record the query run time.
-3.7s
+explain select restaurant.name "Restaurant", avg(review.stars) "Stars" from restaurant, review where restaurant.id = review.restaurant_id and restaurant.name = 'Nienow, Kiehn and DuBuque' group by restaurant.name;
+
 --4 Re-run query with explain, and save the explain plan.
-Aggregate  (cost=4494742.58..4494742.60 rows=1 width=32)
-  ->  Nested Loop  (cost=4.79..3789713.68 rows=282011562 width=4)
-        ->  Seq Scan on review  (cost=0.00..264382.46 rows=6000246 width=4)
-        ->  Materialize  (cost=4.79..186.81 rows=47 width=0)
-              ->  Bitmap Heap Scan on restaurant  (cost=4.79..186.57 rows=47 width=0)
+GroupAggregate  (cost=187.16..287072.54 rows=47 width=51)
+  Group Key: restaurant.name
+  ->  Hash Join  (cost=187.16..287071.48 rows=94 width=23)
+        Hash Cond: (review.restaurant_id = restaurant.id)
+        ->  Seq Scan on review  (cost=0.00..264382.46 rows=6000246 width=8)
+        ->  Hash  (cost=186.57..186.57 rows=47 width=23)
+              ->  Bitmap Heap Scan on restaurant  (cost=4.79..186.57 rows=47 width=23)
                     Recheck Cond: ((name)::text = 'Nienow, Kiehn and DuBuque'::text)
                     ->  Bitmap Index Scan on restaurant_name_idx  (cost=0.00..4.78 rows=47 width=0)
                           Index Cond: ((name)::text = 'Nienow, Kiehn and DuBuque'::text)
+
 --5 Create an index for the foreign key used in the join to make the above queries faster.
+
 --6 Re-run the query you ran in step 1. Is performance improved? Record the query run time.
 --7 Re-run the query you ran in step 3. Is performance improved? Record the query run time.
 --8 With explain, compare the before and after query plan of both queries.
